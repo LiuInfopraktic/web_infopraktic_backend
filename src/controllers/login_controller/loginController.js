@@ -1,4 +1,12 @@
 const loginService = require('../../services/login_service/loginService')
+const jwt = require('jsonwebtoken');
+
+const secretKey = 'K@rt0shk@';
+
+const generateToken = (userData) => {
+    const token = jwt.sign(userData, secretKey);
+    return token;
+}
 
 const login = async (req, res) => {
     let user = req.body.user;
@@ -7,7 +15,7 @@ const login = async (req, res) => {
     if (user && pass) {
         try {
             response = await loginService.login({user,pass})
-            if(response !== String) res.status(200).send(response)
+            if(typeof(response) != 'string') res.status(200).send({token:generateToken(response)})
             else {
                 let error_code = 500;
                 switch(response){
@@ -20,8 +28,6 @@ const login = async (req, res) => {
                     default:
                         break;
                 }
-                console.log(error_code)
-                console.log(response)
                 res.status(error_code).send({error:response})
             }
         } catch (e){ res.status(500).send({error:e}) }
